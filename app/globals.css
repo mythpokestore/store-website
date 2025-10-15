@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-night font-body text-white antialiased;
+}
+
+a {
+  @apply text-myth-purple transition-colors hover:text-myth-purple-dark;
+}
+
+::selection {
+  background: theme(colors.myth-purple / 0.35);
+  color: theme(colors.white);
+}
