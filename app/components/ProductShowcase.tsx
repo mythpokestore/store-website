@@ -28,40 +28,65 @@ export function ProductShowcase() {
   );
 
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [{ canPrev, canNext }, setScrollState] = useState({
-    canPrev: false,
-    canNext: true,
-  });
+  const [activeSlide, setActiveSlide] = useState(0);
 
-  const updateScrollState = useCallback(() => {
+  const productCount = activeCollection.products.length;
+
+  const scrollToIndex = useCallback((index: number, smooth = true) => {
     const node = carouselRef.current;
     if (!node) {
-      setScrollState({ canPrev: false, canNext: false });
       return;
     }
 
-    const { scrollLeft, scrollWidth, clientWidth } = node;
-    const maxScrollLeft = Math.max(scrollWidth - clientWidth, 0);
-    setScrollState({
-      canPrev: scrollLeft > 16,
-      canNext: scrollLeft < maxScrollLeft - 16,
+    const target = node.children.item(index) as HTMLElement | null;
+    node.scrollTo({
+      left: target?.offsetLeft ?? 0,
+      behavior: smooth ? "smooth" : "auto",
     });
   }, []);
 
-  const scrollByCard = useCallback((direction: "prev" | "next") => {
+  const scrollByCard = useCallback(
+    (direction: "prev" | "next") => {
+      if (productCount <= 1) {
+        return;
+      }
+
+      setActiveSlide((prev) => {
+        const next =
+          direction === "next"
+            ? (prev + 1) % productCount
+            : (prev - 1 + productCount) % productCount;
+        scrollToIndex(next);
+        return next;
+      });
+    },
+    [productCount, scrollToIndex],
+  );
+
+  const syncActiveSlide = useCallback(() => {
     const node = carouselRef.current;
     if (!node) {
       return;
     }
 
-    const firstChild = node.firstElementChild as HTMLElement | null;
-    const gap = 24; // corresponds to gap-6 (1.5rem)
-    const offset = (firstChild?.clientWidth ?? node.clientWidth) + gap;
+    const children = Array.from(node.children) as HTMLElement[];
+    if (children.length === 0) {
+      return;
+    }
 
-    node.scrollBy({
-      left: direction === "next" ? offset : -offset,
-      behavior: "smooth",
+    const { scrollLeft } = node;
+    let closestIndex = 0;
+    let minDelta = Number.POSITIVE_INFINITY;
+
+    children.forEach((child, index) => {
+      const delta = Math.abs(child.offsetLeft - scrollLeft);
+      if (delta < minDelta) {
+        minDelta = delta;
+        closestIndex = index;
+      }
     });
+
+    setActiveSlide(closestIndex);
   }, []);
 
   useEffect(() => {
@@ -70,8 +95,8 @@ export function ProductShowcase() {
       return;
     }
 
-    updateScrollState();
-    const handleScroll = () => updateScrollState();
+    syncActiveSlide();
+    const handleScroll = () => syncActiveSlide();
 
     node.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll);
@@ -80,17 +105,29 @@ export function ProductShowcase() {
       node.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
-  }, [updateScrollState]);
+  }, [syncActiveSlide, activeCollection.id]);
 
   useEffect(() => {
-    const node = carouselRef.current;
-    if (!node) {
+    setActiveSlide(0);
+    scrollToIndex(0, false);
+    syncActiveSlide();
+  }, [activeCollection.id, scrollToIndex, syncActiveSlide]);
+
+  useEffect(() => {
+    if (productCount <= 1) {
       return;
     }
 
-    node.scrollTo({ left: 0 });
-    updateScrollState();
-  }, [activeCollection.id, updateScrollState]);
+    const interval = window.setInterval(() => {
+      setActiveSlide((prev) => {
+        const next = (prev + 1) % productCount;
+        scrollToIndex(next);
+        return next;
+      });
+    }, 3000);
+
+    return () => window.clearInterval(interval);
+  }, [productCount, scrollToIndex]);
 
   if (!activeCollection) {
     return null;
@@ -154,7 +191,7 @@ export function ProductShowcase() {
                 type="button"
                 onClick={() => scrollByCard("prev")}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/70 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                disabled={!canPrev}
+                disabled={productCount <= 1}
                 aria-label="Scroll products left"
               >
                 <svg
@@ -173,7 +210,7 @@ export function ProductShowcase() {
                 type="button"
                 onClick={() => scrollByCard("next")}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/70 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                disabled={!canNext}
+                disabled={productCount <= 1}
                 aria-label="Scroll products right"
               >
                 <svg
