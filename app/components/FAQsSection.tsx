@@ -3,7 +3,10 @@ import { faqs } from "../data/faqs";
 
 export function FAQsSection() {
   return (
-    <section id="faq" className="px-6 pb-24 pt-20 sm:px-12 lg:px-20">
+    <section
+      id="faq"
+      className="px-6 pb-24 pt-20 sm:px-12 lg:px-20 scroll-mt-28"
+    >
       <div className="mx-auto flex max-w-6xl flex-col gap-12 lg:flex-row lg:items-start">
         <div className="max-w-sm">
           <SectionHeading

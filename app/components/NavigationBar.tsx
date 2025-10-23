@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const navLinks = [
@@ -10,12 +11,14 @@ export function NavigationBar() {
     <header className="sticky top-0 z-50 border-b border-white/5 bg-night/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 sm:px-12 lg:px-20">
         <Link href="/" className="flex items-center gap-3">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-myth-purple text-sm font-semibold text-white">
-            M
-          </span>
-          <span className="font-heading text-lg uppercase tracking-[0.12em] text-white">
-            MythPoke
-          </span>
+          <Image
+            src="/logo.png"
+            alt="MythPoke"
+            width={547}
+            height={98}
+            className="h-8 w-auto"
+            priority
+          />
         </Link>
         <nav className="flex items-center gap-6 text-sm text-white/70">
           {navLinks.map((link) => (

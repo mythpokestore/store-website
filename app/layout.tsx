@@ -54,7 +54,7 @@ export default function RootLayout({
       className={`${inter.variable} ${orbitron.variable} ${russo.variable}`}
     >
       <body className="bg-night font-body text-white">
-        <div className="relative min-h-screen overflow-hidden">
+        <div className="relative min-h-screen overflow-x-hidden">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(139,92,246,0.18),_rgba(13,10,23,0)_65%)]" />
           <div className="relative flex min-h-screen flex-col">
             <NavigationBar />
