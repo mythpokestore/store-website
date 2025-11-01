@@ -28,40 +28,76 @@ export function ProductShowcase() {
   );
 
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [{ canPrev, canNext }, setScrollState] = useState({
-    canPrev: false,
-    canNext: true,
-  });
+  const [activeSlide, setActiveSlide] = useState(0);
 
-  const updateScrollState = useCallback(() => {
+  const productCount = activeCollection.products.length;
+
+  const scrollToIndex = useCallback((index: number, smooth = true) => {
     const node = carouselRef.current;
     if (!node) {
-      setScrollState({ canPrev: false, canNext: false });
       return;
     }
 
-    const { scrollLeft, scrollWidth, clientWidth } = node;
-    const maxScrollLeft = Math.max(scrollWidth - clientWidth, 0);
-    setScrollState({
-      canPrev: scrollLeft > 16,
-      canNext: scrollLeft < maxScrollLeft - 16,
+    const target = node.children.item(index) as HTMLElement | null;
+    node.scrollTo({
+      left: target?.offsetLeft ?? 0,
+      behavior: smooth ? "smooth" : "auto",
     });
   }, []);
 
-  const scrollByCard = useCallback((direction: "prev" | "next") => {
+  const handleSelectSlide = useCallback(
+    (index: number) => {
+      if (index < 0 || index >= productCount) {
+        return;
+      }
+      setActiveSlide(index);
+      scrollToIndex(index);
+    },
+    [productCount, scrollToIndex],
+  );
+
+  const scrollByCard = useCallback(
+    (direction: "prev" | "next") => {
+      if (productCount <= 1) {
+        return;
+      }
+
+      setActiveSlide((prev) => {
+        const next =
+          direction === "next"
+            ? Math.min(prev + 1, productCount - 1)
+            : Math.max(prev - 1, 0);
+        scrollToIndex(next);
+        return next;
+      });
+    },
+    [productCount, scrollToIndex],
+  );
+
+  const syncActiveSlide = useCallback(() => {
     const node = carouselRef.current;
     if (!node) {
       return;
     }
 
-    const firstChild = node.firstElementChild as HTMLElement | null;
-    const gap = 24; // corresponds to gap-6 (1.5rem)
-    const offset = (firstChild?.clientWidth ?? node.clientWidth) + gap;
+    const children = Array.from(node.children) as HTMLElement[];
+    if (children.length === 0) {
+      return;
+    }
 
-    node.scrollBy({
-      left: direction === "next" ? offset : -offset,
-      behavior: "smooth",
+    const { scrollLeft } = node;
+    let closestIndex = 0;
+    let minDelta = Number.POSITIVE_INFINITY;
+
+    children.forEach((child, index) => {
+      const delta = Math.abs(child.offsetLeft - scrollLeft);
+      if (delta < minDelta) {
+        minDelta = delta;
+        closestIndex = index;
+      }
     });
+
+    setActiveSlide(closestIndex);
   }, []);
 
   useEffect(() => {
@@ -70,8 +106,8 @@ export function ProductShowcase() {
       return;
     }
 
-    updateScrollState();
-    const handleScroll = () => updateScrollState();
+    syncActiveSlide();
+    const handleScroll = () => syncActiveSlide();
 
     node.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll);
@@ -80,17 +116,13 @@ export function ProductShowcase() {
       node.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
-  }, [updateScrollState]);
+  }, [syncActiveSlide, activeCollection.id, productCount]);
 
   useEffect(() => {
-    const node = carouselRef.current;
-    if (!node) {
-      return;
-    }
-
-    node.scrollTo({ left: 0 });
-    updateScrollState();
-  }, [activeCollection.id, updateScrollState]);
+    setActiveSlide(0);
+    scrollToIndex(0, false);
+    syncActiveSlide();
+  }, [activeCollection.id, productCount, scrollToIndex, syncActiveSlide]);
 
   if (!activeCollection) {
     return null;
@@ -154,7 +186,7 @@ export function ProductShowcase() {
                 type="button"
                 onClick={() => scrollByCard("prev")}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/70 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                disabled={!canPrev}
+                disabled={productCount <= 1}
                 aria-label="Scroll products left"
               >
                 <svg
@@ -173,7 +205,7 @@ export function ProductShowcase() {
                 type="button"
                 onClick={() => scrollByCard("next")}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/70 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                disabled={!canNext}
+                disabled={productCount <= 1}
                 aria-label="Scroll products right"
               >
                 <svg
@@ -208,6 +240,27 @@ export function ProductShowcase() {
             <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-surface-elevated/80 to-transparent" />
             <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-surface-elevated/80 to-transparent" />
           </div>
+          {productCount > 1 && (
+            <nav className="flex items-center justify-center gap-3 pt-2">
+              {activeCollection.products.map((product, index) => {
+                const isActive = index === activeSlide;
+                return (
+                  <button
+                    key={product.name}
+                    type="button"
+                    onClick={() => handleSelectSlide(index)}
+                    className={`h-3 w-3 rounded-full border transition ${
+                      isActive
+                        ? "border-myth-purple bg-myth-purple shadow-[0_0_12px_rgba(139,92,246,0.6)]"
+                        : "border-white/20 bg-white/10 hover:border-myth-purple/40 hover:bg-myth-purple/30"
+                    }`}
+                    aria-label={`View product ${product.name}`}
+                    aria-current={isActive ? "true" : undefined}
+                  />
+                );
+              })}
+            </nav>
+          )}
         </div>
       </div>
     </section>

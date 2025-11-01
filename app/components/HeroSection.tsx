@@ -16,7 +16,7 @@ export function HeroSection() {
         </p>
         <div className="mt-10 flex items-center justify-center">
           <Link
-            href="#products"
+            href="/products"
             className="inline-flex items-center justify-center rounded-full bg-myth-purple px-8 py-3 text-sm font-medium text-white transition hover:bg-myth-purple-dark"
           >
             Shop Now

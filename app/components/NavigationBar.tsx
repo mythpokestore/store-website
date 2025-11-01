@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 const navLinks = [
-  { label: "Shop", href: "#products" },
-  { label: "FAQs", href: "#faq" },
+  { label: "Shop", href: "/products" },
+  { label: "FAQs", href: "/#faq" },
 ];
 
 export function NavigationBar() {
@@ -32,7 +32,7 @@ export function NavigationBar() {
           ))}
         </nav>
         <Link
-          href="#products"
+          href="/products"
           className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/70 transition hover:text-white"
           aria-label="Open cart"
         >
