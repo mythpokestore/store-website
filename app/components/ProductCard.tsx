@@ -1,19 +1,12 @@
+import Link from "next/link";
+import { variantMeta } from "../data/products";
 import type { Product } from "../data/products";
 
-const variantMeta = {
-  canvas: {
-    label: "Canvas",
-    spec: "Textured depth · Matte UV",
-  },
-  acrylic: {
-    label: "Acrylic",
-    spec: "Gloss acrylic · Floating mount",
-  },
-} as const;
+type ProductVariant = keyof typeof variantMeta;
 
 type ProductCardProps = {
   product: Product;
-  variant: "canvas" | "acrylic";
+  variant: ProductVariant;
 };
 
 export function ProductCard({ product, variant }: ProductCardProps) {
@@ -56,9 +49,12 @@ export function ProductCard({ product, variant }: ProductCardProps) {
         <span className="text-lg font-semibold text-myth-purple">
           {product.price}
         </span>
-        <button className="inline-flex items-center justify-center rounded-full bg-myth-purple px-5 py-2 text-xs font-medium uppercase tracking-[0.35em] text-white transition hover:bg-myth-purple-dark">
-          Add to Cart
-        </button>
+        <Link
+          href={`/products/${product.slug}`}
+          className="inline-flex items-center justify-center rounded-full bg-myth-purple px-5 py-2 text-xs font-medium uppercase tracking-[0.35em] text-white transition hover:bg-myth-purple-dark"
+        >
+          View Details
+        </Link>
       </div>
     </article>
   );
