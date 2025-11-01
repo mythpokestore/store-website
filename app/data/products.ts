@@ -1,4 +1,16 @@
+export const variantMeta = {
+  canvas: {
+    label: "Canvas",
+    spec: "Textured depth · Matte UV",
+  },
+  acrylic: {
+    label: "Acrylic",
+    spec: "Gloss acrylic · Floating mount",
+  },
+} as const;
+
 export type Product = {
+  slug: string;
   name: string;
   rarity: string;
   price: string;
@@ -7,7 +19,7 @@ export type Product = {
 };
 
 export type ProductCollection = {
-  id: "canvas" | "acrylic";
+  id: keyof typeof variantMeta;
   title: string;
   description: string;
   detail: string;
@@ -23,6 +35,7 @@ export const productCollections: ProductCollection[] = [
       "Each frame features extended art, laser-etched type, and magnetic mounts for floating display.",
     products: [
       {
+        slug: "eternal-charizard",
         name: "Eternal Charizard",
         rarity: "Mythic Edition",
         price: "$220",
@@ -30,6 +43,7 @@ export const productCollections: ProductCollection[] = [
         palette: ["#f97316", "#facc15", "#7c2d12"],
       },
       {
+        slug: "aurora-sylveon",
         name: "Aurora Sylveon",
         rarity: "Dreamshine",
         price: "$190",
@@ -37,6 +51,7 @@ export const productCollections: ProductCollection[] = [
         palette: ["#ec4899", "#a855f7", "#4c1d95"],
       },
       {
+        slug: "starforge-mewtwo",
         name: "Starforge Mewtwo",
         rarity: "Astral",
         price: "$210",
@@ -44,6 +59,7 @@ export const productCollections: ProductCollection[] = [
         palette: ["#6366f1", "#22d3ee", "#0f172a"],
       },
       {
+        slug: "verdant-venusaur",
         name: "Verdant Venusaur",
         rarity: "Genesis",
         price: "$185",
@@ -51,6 +67,7 @@ export const productCollections: ProductCollection[] = [
         palette: ["#22c55e", "#84cc16", "#14532d"],
       },
       {
+        slug: "tempest-lugia",
         name: "Tempest Lugia",
         rarity: "Skyfall",
         price: "$215",
@@ -67,6 +84,7 @@ export const productCollections: ProductCollection[] = [
       "Floating hardware kit included. Light-reactive layers reveal highlights under LED illumination.",
     products: [
       {
+        slug: "galaxy-umbreon",
         name: "Galaxy Umbreon",
         rarity: "Shadowfoil",
         price: "$240",
@@ -74,6 +92,7 @@ export const productCollections: ProductCollection[] = [
         palette: ["#1f2937", "#6d28d9", "#22d3ee"],
       },
       {
+        slug: "obsidian-giratina",
         name: "Obsidian Giratina",
         rarity: "Phantom",
         price: "$260",
@@ -81,6 +100,7 @@ export const productCollections: ProductCollection[] = [
         palette: ["#111827", "#f59e0b", "#ef4444"],
       },
       {
+        slug: "nebula-rayquaza",
         name: "Nebula Rayquaza",
         rarity: "Celestial",
         price: "$255",
@@ -88,6 +108,7 @@ export const productCollections: ProductCollection[] = [
         palette: ["#14b8a6", "#10b981", "#0f172a"],
       },
       {
+        slug: "polar-articuno",
         name: "Polar Articuno",
         rarity: "Frostbound",
         price: "$235",
@@ -95,6 +116,7 @@ export const productCollections: ProductCollection[] = [
         palette: ["#22d3ee", "#38bdf8", "#0ea5e9"],
       },
       {
+        slug: "radiant-ho-oh",
         name: "Radiant Ho-Oh",
         rarity: "Phoenix",
         price: "$245",
@@ -104,3 +126,14 @@ export const productCollections: ProductCollection[] = [
     ],
   },
 ];
+
+export const allProducts = productCollections.flatMap((collection) =>
+  collection.products.map((product) => ({
+    product,
+    variant: collection.id,
+  })),
+);
+
+export function getProductBySlug(slug: string) {
+  return allProducts.find(({ product }) => product.slug === slug);
+}

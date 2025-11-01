@@ -186,7 +186,7 @@ export function ProductShowcase() {
                 type="button"
                 onClick={() => scrollByCard("prev")}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/70 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                disabled={productCount <= 1}
+                disabled={productCount <= 1 || activeSlide === 0}
                 aria-label="Scroll products left"
               >
                 <svg
@@ -205,7 +205,7 @@ export function ProductShowcase() {
                 type="button"
                 onClick={() => scrollByCard("next")}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/70 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-                disabled={productCount <= 1}
+                disabled={productCount <= 1 || activeSlide === productCount - 1}
                 aria-label="Scroll products right"
               >
                 <svg
@@ -230,7 +230,7 @@ export function ProductShowcase() {
             >
               {activeCollection.products.map((product) => (
                 <div
-                  key={product.name}
+                  key={product.slug}
                   className="snap-start h-full shrink-0 basis-[min(320px,_100%)] sm:basis-[min(360px,_70%)] lg:basis-[min(380px,_45%)] xl:basis-[min(400px,_33%)]"
                 >
                   <ProductCard product={product} variant={activeCollection.id} />
@@ -246,7 +246,7 @@ export function ProductShowcase() {
                 const isActive = index === activeSlide;
                 return (
                   <button
-                    key={product.name}
+                    key={product.slug}
                     type="button"
                     onClick={() => handleSelectSlide(index)}
                     className={`h-3 w-3 rounded-full border transition ${

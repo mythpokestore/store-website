@@ -1,23 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { ProductCard } from "../../components/ProductCard";
-import { productCollections } from "../../data/products";
+import { notFound } from "next/navigation";
+import { ProductCard } from "../components/ProductCard";
+import { allProducts } from "../data/products";
 
-const PRODUCTS_PER_PAGE = 5;
+const PRODUCTS_PER_PAGE = 3;
 
 type ProductsPageProps = {
-  params: {
-    page?: string[];
+  searchParams?: {
+    page?: string;
   };
 };
-
-const allProducts = productCollections.flatMap((collection) =>
-  collection.products.map((product) => ({
-    product,
-    variant: collection.id,
-  })),
-);
 
 const totalProducts = allProducts.length;
 const totalPages = Math.max(
@@ -32,19 +25,19 @@ export const metadata: Metadata = {
 };
 
 const resolveHrefForPage = (pageNumber: number) =>
-  pageNumber <= 1 ? "/products" : `/products/${pageNumber}`;
+  pageNumber <= 1 ? "/products" : `/products?page=${pageNumber}`;
 
-export default function ProductsPage({ params }: ProductsPageProps) {
-  const rawPage = params.page?.[0];
-  const parsedPage = rawPage ? Number(rawPage) : 1;
+export default function ProductsPage({
+  searchParams,
+}: ProductsPageProps) {
+  const rawPage = Number(searchParams?.page ?? "1");
   const currentPage =
-    Number.isFinite(parsedPage) && parsedPage >= 1
-      ? Math.floor(parsedPage)
+    Number.isFinite(rawPage) && rawPage >= 1
+      ? Math.floor(rawPage)
       : 1;
 
   if (currentPage > totalPages) {
-    const fallbackHref = resolveHrefForPage(totalPages);
-    redirect(fallbackHref);
+    notFound();
   }
 
   const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
@@ -99,7 +92,7 @@ export default function ProductsPage({ params }: ProductsPageProps) {
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {paginatedProducts.map(({ product, variant }) => (
             <ProductCard
-              key={`${variant}-${product.name}`}
+              key={product.slug}
               product={product}
               variant={variant}
             />
@@ -161,3 +154,4 @@ export default function ProductsPage({ params }: ProductsPageProps) {
     </section>
   );
 }
+
